@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Pascholotto.Api/Pascholotto.Api.csproj" />
+    <Project Path="src/Pascholotto.Application/Pascholotto.Application.csproj" />
+    <Project Path="src/Pascholotto.Domain/Pascholotto.Domain.csproj" />
+    <Project Path="src/Pascholotto.Infrastructure/Pascholotto.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Pascholotto.Application.Tests/Pascholotto.Application.Tests.csproj" />
+  </Folder>
+</Solution>

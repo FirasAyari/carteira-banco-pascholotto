@@ -7,6 +7,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
+    <PackageReference Include="Azure.Core" Version="1.47.1" ExcludeAssets="all" PrivateAssets="all" />
+    <PackageReference Include="Azure.Identity" Version="1.14.2" ExcludeAssets="all" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.73.1" ExcludeAssets="all" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.73.1" ExcludeAssets="all" PrivateAssets="all" />
+    <PackageReference Include="System.ClientModel" Version="1.5.1" ExcludeAssets="all" PrivateAssets="all" />
     <PackageReference Include="QuestPDF" Version="2026.2.4" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.17.0" />
   </ItemGroup>
@@ -15,6 +21,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
 </Project>

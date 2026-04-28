@@ -21,7 +21,7 @@ internal sealed class QuestPdfBoletoPdfGenerator : IBoletoPdfGenerator
                 page.Header().Column(column =>
                 {
                     column.Item().Text("Banco Pascholotto").FontSize(20).Bold();
-                    column.Item().Text("Boleto de cobranca nao registrado").FontSize(12);
+                    column.Item().Text("Boleto de acordo").FontSize(12);
                     column.Item().PaddingTop(8).Text($"Linha digitavel: {model.LineDigitable}").Bold();
                 });
 

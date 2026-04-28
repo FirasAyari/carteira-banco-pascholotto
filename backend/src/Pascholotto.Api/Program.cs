@@ -8,7 +8,6 @@ using Pascholotto.Api.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 builder.Services.AddCors(options =>
 {
@@ -48,11 +47,6 @@ await app.Services.InitializeDatabaseAsync();
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
 
 var useHttpsRedirection = app.Configuration.GetValue("App:UseHttpsRedirection", true);
 if (useHttpsRedirection)

@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY global.json ./
+COPY NuGet.config ./
 COPY PascholottoMvp.slnx ./
 COPY src/Pascholotto.Domain/Pascholotto.Domain.csproj src/Pascholotto.Domain/
 COPY src/Pascholotto.Application/Pascholotto.Application.csproj src/Pascholotto.Application/

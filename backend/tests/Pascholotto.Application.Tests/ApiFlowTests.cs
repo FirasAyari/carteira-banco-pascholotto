@@ -13,24 +13,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Pascholotto.Application.DTOs;
 using Pascholotto.Infrastructure.Persistence;
 
 namespace Pascholotto.Application.Tests;
 
-public sealed class ApiFlowTests : IClassFixture<PascholottoApiFactory>
+[TestClass]
+public sealed class ApiFlowTests
 {
-    private readonly PascholottoApiFactory _factory;
-
-    public ApiFlowTests(PascholottoApiFactory factory)
-    {
-        _factory = factory;
-    }
-
-    [Fact]
+    [TestMethod]
     public async Task FullNegotiationFlow_ShouldCreateAgreementAndGeneratePdf()
     {
-        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        using var factory = new PascholottoApiFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             AllowAutoRedirect = false,
             BaseAddress = new Uri("https://localhost")
@@ -39,17 +35,18 @@ public sealed class ApiFlowTests : IClassFixture<PascholottoApiFactory>
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestAuthHandler.SchemeName);
 
         var contracts = await client.GetFromJsonAsync<List<ContractSummaryResponse>>("/api/contracts?contractNumber=BP-2026-001");
-        Assert.NotNull(contracts);
-        var contract = Assert.Single(contracts!);
+        Assert.IsNotNull(contracts);
+        Assert.AreEqual(1, contracts.Count);
+        var contract = contracts[0];
 
         var debtResponse = await client.PostAsJsonAsync(
             $"/api/contracts/{contract.Id}/debt-calculations",
             new DebtCalculationRequest(null));
-        Assert.Equal(HttpStatusCode.OK, debtResponse.StatusCode);
+        Assert.AreEqual(HttpStatusCode.OK, debtResponse.StatusCode);
 
         var debtPayload = await debtResponse.Content.ReadFromJsonAsync<DebtCalculationResponse>();
-        Assert.NotNull(debtPayload);
-        Assert.True(debtPayload!.TotalAmount > 0);
+        Assert.IsNotNull(debtPayload);
+        Assert.IsTrue(debtPayload.TotalAmount > 0);
 
         var firstDueDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10));
         var createRequest = new CreateAgreementRequest(debtPayload.Id, 4, 100m, firstDueDate);
@@ -57,28 +54,29 @@ public sealed class ApiFlowTests : IClassFixture<PascholottoApiFactory>
         var simulationResponse = await client.PostAsJsonAsync(
             $"/api/contracts/{contract.Id}/agreements/simulate",
             new AgreementSimulationRequest(debtPayload.Id, 4, 100m, firstDueDate));
-        Assert.Equal(HttpStatusCode.OK, simulationResponse.StatusCode);
+        Assert.AreEqual(HttpStatusCode.OK, simulationResponse.StatusCode);
 
         var createResponse = await client.PostAsJsonAsync($"/api/contracts/{contract.Id}/agreements", createRequest);
-        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        Assert.AreEqual(HttpStatusCode.Created, createResponse.StatusCode);
 
         var agreementPayload = await createResponse.Content.ReadFromJsonAsync<AgreementDetailResponse>();
-        Assert.NotNull(agreementPayload);
-        Assert.Equal(4, agreementPayload!.Installments.Count);
+        Assert.IsNotNull(agreementPayload);
+        Assert.AreEqual(4, agreementPayload.Installments.Count);
 
         var boletos = await client.GetFromJsonAsync<List<BoletoSummaryResponse>>($"/api/agreements/{agreementPayload.Id}/boletos");
-        Assert.NotNull(boletos);
-        Assert.Equal(4, boletos!.Count);
+        Assert.IsNotNull(boletos);
+        Assert.AreEqual(4, boletos.Count);
 
         var pdfResponse = await client.GetAsync($"/api/agreements/{agreementPayload.Id}/boletos/{agreementPayload.Installments[0].Id}/pdf");
-        Assert.Equal(HttpStatusCode.OK, pdfResponse.StatusCode);
-        Assert.Equal("application/pdf", pdfResponse.Content.Headers.ContentType?.MediaType);
+        Assert.AreEqual(HttpStatusCode.OK, pdfResponse.StatusCode);
+        Assert.AreEqual("application/pdf", pdfResponse.Content.Headers.ContentType?.MediaType);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task SecondActiveAgreement_ShouldBeRejected()
     {
-        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        using var factory = new PascholottoApiFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             BaseAddress = new Uri("https://localhost")
         });
@@ -86,7 +84,9 @@ public sealed class ApiFlowTests : IClassFixture<PascholottoApiFactory>
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestAuthHandler.SchemeName);
 
         var contracts = await client.GetFromJsonAsync<List<ContractSummaryResponse>>("/api/contracts?contractNumber=BP-2026-002");
-        var contract = Assert.Single(contracts!);
+        Assert.IsNotNull(contracts);
+        Assert.AreEqual(1, contracts.Count);
+        var contract = contracts[0];
 
         var debtResponse = await client.PostAsJsonAsync(
             $"/api/contracts/{contract.Id}/debt-calculations",
@@ -97,16 +97,17 @@ public sealed class ApiFlowTests : IClassFixture<PascholottoApiFactory>
         var createRequest = new CreateAgreementRequest(debtPayload!.Id, 3, 0m, firstDueDate);
 
         var firstCreate = await client.PostAsJsonAsync($"/api/contracts/{contract.Id}/agreements", createRequest);
-        Assert.Equal(HttpStatusCode.Created, firstCreate.StatusCode);
+        Assert.AreEqual(HttpStatusCode.Created, firstCreate.StatusCode);
 
         var secondCreate = await client.PostAsJsonAsync($"/api/contracts/{contract.Id}/agreements", createRequest);
-        Assert.Equal(HttpStatusCode.BadRequest, secondCreate.StatusCode);
+        Assert.AreEqual(HttpStatusCode.BadRequest, secondCreate.StatusCode);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DebtCalculationWithPastDate_ShouldBeRejected()
     {
-        using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        using var factory = new PascholottoApiFactory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             BaseAddress = new Uri("https://localhost")
         });
@@ -114,13 +115,15 @@ public sealed class ApiFlowTests : IClassFixture<PascholottoApiFactory>
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestAuthHandler.SchemeName);
 
         var contracts = await client.GetFromJsonAsync<List<ContractSummaryResponse>>("/api/contracts?contractNumber=BP-2026-001");
-        var contract = Assert.Single(contracts!);
+        Assert.IsNotNull(contracts);
+        Assert.AreEqual(1, contracts.Count);
+        var contract = contracts[0];
 
         var response = await client.PostAsJsonAsync(
             $"/api/contracts/{contract.Id}/debt-calculations",
             new DebtCalculationRequest(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1))));
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }
 

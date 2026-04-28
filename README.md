@@ -26,6 +26,12 @@ Aplicacao MVP para operacao de cobranca da carteira Banco Pascholotto, com:
 └─ docker-compose.yml
 ```
 
+## Escopo tecnico
+
+O documento exigido no processo seletivo esta em:
+
+- [docs/technical-scope.md](docs/technical-scope.md)
+
 ## Requisitos
 
 Para rodar com Docker:
@@ -154,6 +160,16 @@ dotnet test backend/PascholottoMvp.slnx
 ```powershell
 cd frontend
 npm run test
+```
+
+### Frontend e2e com Playwright Chromium
+
+Com o Docker em execucao:
+
+```powershell
+cd frontend
+npx playwright install chromium
+npm run test:e2e
 ```
 
 ### Cobertura do frontend

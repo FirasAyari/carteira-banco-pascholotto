@@ -80,7 +80,7 @@ describe("NegotiationPage", () => {
         debtCalculationId: "debt-1",
         installmentCount: 4,
         downPaymentAmount: 0,
-        firstDueDate: agreementSimulationFixture.firstDueDate,
+        firstDueDate: defaultFirstDueDate(),
       });
     });
 
